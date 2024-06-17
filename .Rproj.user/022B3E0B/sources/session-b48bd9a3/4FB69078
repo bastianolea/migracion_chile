@@ -3,7 +3,7 @@
     "path": "~/Documents/Apps Shiny/migracion_chile/procesar_datos.R",
     "project_path": "procesar_datos.R",
     "type": "r_source",
-    "hash": "1929267877",
+    "hash": "0",
     "contents": "",
     "dirty": false,
     "created": 1718657681387.0,
@@ -13,7 +13,7 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "77,0",
+        "cursorPosition": "79,0",
         "scrollLine": "68"
     },
     "folds": "",
