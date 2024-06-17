@@ -75,5 +75,6 @@ refugiados_2 <- refugiados |>
 residencias <- bind_rows(temporales_otorgadas_2, definitivas_otorgadas_2) |> 
   ungroup()
 
-
+# guardar ----
+write.csv2(residencias, "procesados/residencias_comuna_año.csv")
 
