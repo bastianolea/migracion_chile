@@ -1,67 +1,76 @@
 library(dplyr)
 library(purrr)
+library(janitor)
 
-carpetas <- dir("datos")
+source("funciones.R")
 
-# residencias definitivas ----
-archivos_definitivas <- dir(paste0("datos/", carpetas[1]), full.names = T)
+# residencias otorgadas ----
 
-# cargar y limpiar todos los datos
-definitivas_otorgadas <- map(archivos_definitivas, \(archivo) {
-  message(archivo)
-  
-  # cargar
-  dato <- readxl::read_xlsx(archivo)
-  # dato <- readxl::read_excel(archivos[2])
-  
-  # extraer comuna, pais y año
-  dato_2 <- dato |> 
-    janitor::clean_names() |> 
-    select(comuna, pais, año = ano) |> 
-    group_by(comuna, pais, año) |> 
-    count()
-  
-  return(dato_2)
-})
-
-definitivas_otorgadas_2 <- definitivas_otorgadas |> 
-  list_rbind() |> 
-  mutate(residencia = "Definitiva")
-
-
-# residencias temporales ----
-archivos_temporales <- dir(paste0("datos/", carpetas[3]), full.names = T)
+##  definitivas ----
+archivos_otorgadas_definitivas <- dir("datos_originales/RD-Otorgadas-2000-al-2023", full.names = T)
 
 # cargar y limpiar todos los datos
-temporales_otorgadas <- map(archivos_temporales, \(archivo) {
-  message(archivo)
-  
-  # cargar
-  dato <- readxl::read_xlsx(archivo)
-  # dato <- readxl::read_excel(archivos[2])
-  
-  # extraer comuna, pais y año
-  dato_2 <- dato |> 
-    janitor::clean_names() |> 
-    select(comuna, pais, año = ano) |> 
-    group_by(comuna, pais, año) |> 
-    count()
-  
-  return(dato_2)
-})
-
-
-temporales_otorgadas_2 <- temporales_otorgadas |> 
+otorgadas_definitivas <- archivos_otorgadas_definitivas |> 
+  cargar_datos_residencias() |> 
   list_rbind() |> 
-  mutate(residencia = "Temporal")
+  mutate(residencia = "Definitiva",
+         estado = "Otorgadas")
 
+
+## temporales ----
+archivos_otorgadas_temporales <- dir("datos_originales/RT-otorgadas-2000-al-2023", full.names = T)
+
+otorgadas_temporales <- archivos_otorgadas_temporales |> 
+  cargar_datos_residencias() |> 
+  list_rbind() |> 
+  mutate(residencia = "Temporal",
+         estado = "Otorgadas")
+
+
+# residencias acogidas ----
+
+## temporales ----
+archivos_acogidas_temporales <- dir("datos_originales/RT-Acogidas-2000-al-2023", full.names = T)
+
+acogidas_temporales <- archivos_acogidas_temporales |> 
+  cargar_datos_residencias() |> 
+  list_rbind() |> 
+  mutate(residencia = "Temporal",
+         estado = "Acogidas")
+
+## definitivas ----
+archivos_acogidas_definitivas <- dir("datos_originales/RD-acogidas-2000-al-2023", full.names = T)
+
+acogidas_definitivas <- archivos_acogidas_definitivas |> 
+  cargar_datos_residencias() |> 
+  list_rbind() |> 
+  mutate(residencia = "Temporal",
+         estado = "Acogidas")
+
+# unir residencias ----
+residencias_otorgadas <- bind_rows(otorgadas_temporales, otorgadas_definitivas) |> ungroup()
+
+residencias_acogidas <- bind_rows(acogidas_temporales, acogidas_definitivas) |> ungroup()
+
+residencias <- bind_rows(residencias_otorgadas, residencias_acogidas)
+
+residencias |> filter(año == 2023)
+
+
+
+# guardar residencias ----
+write.csv2(residencias, "datos_procesados/residencias_comuna_año.csv")
+
+write.csv2(residencias |> filter(año == 2023), "datos_procesados/residencias_comuna_2023.csv")
+
+# -—----
 
 
 
 # refugiados ----
 # no tienen comuna
 
-refugiados <- readxl::read_xlsx("datos/Refugio/Refugiados_WEB.xlsx")
+refugiados <- readxl::read_xlsx("datos_originales/Refugio/Refugiados_WEB.xlsx")
 
 # extraer comuna, pais y año
 refugiados_2 <- refugiados |>
@@ -71,10 +80,25 @@ refugiados_2 <- refugiados |>
   count()
 
 
-# unir residencias ----
-residencias <- bind_rows(temporales_otorgadas_2, definitivas_otorgadas_2) |> 
+
+# estimación ----
+# no están todas las comunas del país
+
+estimacion <- read.csv("datos_originales/Estimacion-2022/basecomunas.csv", header=FALSE, stringsAsFactors=FALSE, fileEncoding="latin1") |> 
+  tibble() |> 
+  row_to_names(1) |> 
+  clean_names()
+
+# contar por país, año y comuna
+estimacion_comuna <- estimacion |> 
+  select(pais, año = ano_estimacion, region, comuna, estimacion) |> 
+  group_by(pais, año, region, comuna) |> 
+  summarize(estimacion = sum(as.numeric(estimacion), na.rm = TRUE)) |> 
+  filter(comuna != toupper("ignorada"),
+         comuna != toupper("otras comunas")) |> 
   ungroup()
 
-# guardar ----
-write.csv2(residencias, "procesados/residencias_comuna_año.csv")
+estimacion_comuna |> filter(año == 2022)
 
+# guardar
+write.csv2(estimacion_comuna, "procesados/estimacion_comuna_año.csv")
