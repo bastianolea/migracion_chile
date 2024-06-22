@@ -119,8 +119,8 @@ estimacion <- read.csv("datos_originales/Estimacion-2022/basecomunas.csv", heade
 # totales por año
 estimacion_año <- estimacion |> 
   mutate(pais = str_to_sentence(pais)) |> 
-  mutate(pais = fct_lump_n(pais, w = estimacion, n = 5, other_level = "Otros")) |> 
-  summarise(n = sum(estimacion), .by = c(pais, año))
+  # mutate(pais = fct_lump_n(pais, w = estimacion, n = 5, other_level = "Otros")) |> 
+  summarise(estimacion = sum(estimacion), .by = c(pais, año))
 
 # contar por país, año y comuna
 estimacion_comuna <- estimacion |> 
@@ -144,8 +144,8 @@ estimacion_comuna |>
   summarize(estimacion = sum(estimacion), .by = c(cut_comuna, comuna, año))
 
 # guardar
-write.csv2(estimacion_comuna, "datos_procesados/estimacion_comuna_año.csv")
+write.csv2(estimacion_comuna, "datos_procesados/extranjeros_estimacion_comuna_año.csv")
 
 write.csv2(estimacion_comuna |> filter(año == 2022), "datos_procesados/extranjeros_estimacion_comuna_2022.csv")
 
-write.csv2(estimacion_año, "datos_procesados/estimacion_año.csv")
+write.csv2(estimacion_año, "datos_procesados/extranjeros_estimacion_año.csv")
