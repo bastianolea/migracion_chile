@@ -22,7 +22,7 @@ Se procesan dos conjuntos de datos: los registros administrativos de permisos de
 ----
 
 
-**Obtener datos:** El script `obtener_datos.R` descarga los datos originales desde el [sitio oficial del Servicio Nacional de Migraciones]((https://serviciomigraciones.cl/estudios-migratorios/datos-abiertos/) y los descomprime. Estos datos corresponden a: 
+**Obtener datos:** El script `obtener_datos.R` descarga los datos originales desde el [sitio oficial del Servicio Nacional de Migraciones](https://serviciomigraciones.cl/estudios-migratorios/datos-abiertos/) y los descomprime. Estos datos corresponden a: 
 - residencias temporales acogidas
 - residencias temporales otorgadas
 - residencias definitivas acogidas
@@ -31,6 +31,8 @@ Se procesan dos conjuntos de datos: los registros administrativos de permisos de
 
 **Procesar datos:** El script `procesar_datos.R` aplica la función `cargar_datos_residencias()` para ir cargando los datos de cada fuente de datos, ya que cada archivo comprimido contiene varios archivos Excel. Al cargarlos, obtiene el conteo de solicitudes por comuna donde se realiza, país de origen de la persona que la realiza, y año. Finalmente, une todos los datos en una sola tabla con 267.909 filas, que se guarda como `residencias_comuna_año.csv`. Adicionalmente, se guarda otra tabla `residencias_comuna_2023.csv`, que solo contiene los datos de 2023 (los más recientes a la fecha), reduciendo el número de filas a 13.088.
 
+
+![Gráfico de extranjeros residentes en chile en comparación con población nacional](graficos/poblacion_estimacion_prediccion_extranjeros.jpg)
 
 ## Fuentes
 
